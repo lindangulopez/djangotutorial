@@ -38,7 +38,7 @@ Open <http://127.0.0.1:8000/polls/> for the app and <http://127.0.0.1:8000/admin
 Run the tests with:
 
 ```bash
-python manage.py test django_polls
+python manage.py test django_polls modelsdemo
 ```
 
 ### Editing the polls app
@@ -66,6 +66,49 @@ pip install -e ./django-polls
 To vote, click a question on `/polls/`, pick a choice and press **Vote**.
 
 A question with no choices shows only the **Vote** button. To add choices, open the admin site at `/admin/`, go to **Questions**, click the question, and fill in the **Choices** rows at the bottom of the page. Three empty rows are shown each time. Press **Save**, then refresh the question's page to see the new options.
+
+## Models demo
+
+The `modelsdemo` app works through the examples in the Django [Models topic guide](https://docs.djangoproject.com/en/6.1/topics/db/models/), one section at a time. It's separate from the polls app.
+
+To try it, apply its migration, load the sample data and start the server:
+
+```bash
+python manage.py migrate
+python manage.py seed_modelsdemo
+python manage.py runserver
+```
+
+Then open <http://127.0.0.1:8000/models-demo/>. The page has one section per concept in the guide, each with a short explanation and live data from the database. All the demo models are also in the admin, under **Modelsdemo**. The seed command is safe to run again; it doesn't create duplicates.
+
+The page is a full HTML page, so the debug toolbar appears on it. Its **SQL** panel shows the queries behind each section, such as the join through `Membership`, or the `place_ptr` join for restaurants.
+
+| Guide section | Models in the demo |
+| --- | --- |
+| Fields | `Musician`, `Album` |
+| Field options: `choices` | `ShirtOwner` (a dictionary of choices), `Runner` (`TextChoices`) |
+| Field options: `primary_key` | `Fruit`, with `name` as the primary key |
+| Automatic primary key fields | Every model without its own primary key gets a `BigAutoField` called `id` |
+| Verbose field names | `VerbosePerson` |
+| Many-to-one relationships | `Manufacturer`, `Car` |
+| Many-to-many relationships | `Topping`, `Pizza` |
+| Extra fields on many-to-many relationships | `Person`, `Group`, `Membership` (the Beatles example) |
+| Meta options | `Ox` (`ordering`, `verbose_name_plural`) |
+| Model methods | `Citizen` (`baby_boomer_status()`, `full_name`) |
+| Overriding predefined model methods | `Blog` (sets `slug` in `save()` and refuses "Yoko Ono's blog") |
+| Abstract base classes | `CommonInfo` → `Student`; `ToppingCollection` → `ChildA`, `ChildB` (`%(app_label)s_%(class)s` related names) |
+| Multi-table inheritance | `Place` → `Restaurant`, `Supplier` (`related_name="provider"`) |
+| Proxy models | `MyCitizen`, `OrderedCitizen`, both proxies for `Citizen` |
+| Multiple inheritance | `Piece` → `Article`, `Book` → `BookReview` |
+
+The guide uses the name `Person` for several unrelated examples, and one app can't have two models with the same name. Where they clash, the model has a new name here: the `SHIRT_SIZES` example is `ShirtOwner`, the model-methods example is `Citizen` (so the guide's `MyPerson` and `OrderedPerson` proxies are `MyCitizen` and `OrderedCitizen`), and the abstract `Base` is `ToppingCollection`. The Beatles example keeps the name `Person`.
+
+Two other small differences:
+
+- `Citizen.birth_date` is optional, so the proxy example can create a person from a first name alone, as the guide does.
+- The guide shows two separate `Blog.save()` overrides. Here they're combined into one.
+
+The 30 tests in `modelsdemo/tests.py` replay the guide's examples, including every Beatles query, and check the demo page and seed command. The guide's example of adding Ringo a second time (with "You've been gone for a month and we miss you.") is tested the other way round: the `UniqueConstraint` on `Membership`, from the same example, blocks the duplicate.
 
 ## Progress
 
