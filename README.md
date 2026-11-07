@@ -1,6 +1,6 @@
 # Django Tutorial: Polls App
 
-My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–7 are complete.
+My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. All eight parts are complete.
 
 ## Setup
 
@@ -148,11 +148,27 @@ With the server running, `/static/polls/style.css` and `/static/polls/images/bac
 
 The admin home page, the question list, and the question add and edit pages all load with these changes, and the 12 tests still pass.
 
-### Part 8 ⏳
+### Part 8: Adding third-party packages ✅
 
-Not started: [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
+[Tutorial part 8](https://docs.djangoproject.com/en/6.1/intro/tutorial08/)
+
+The tutorial installs [Django Debug Toolbar](https://django-debug-toolbar.readthedocs.io/) and leaves the setup to the package's [installation guide](https://django-debug-toolbar.readthedocs.io/en/latest/installation.html), which these changes follow.
+
+| File | What was done |
+| --- | --- |
+| `requirements.txt` | Added `django-debug-toolbar==8.0.0` |
+| `mysite/settings.py` | Added `debug_toolbar` to `INSTALLED_APPS`, its middleware at the top of `MIDDLEWARE`, and `INTERNAL_IPS = ["127.0.0.1"]`. A `TESTING` flag leaves the toolbar out while tests run. |
+| `mysite/urls.py` | Added the toolbar's `__debug__/` URLs, except while tests run |
+
+With the server running, the toolbar's handle appears on the right side of the admin pages, such as <http://127.0.0.1:8000/admin/>. Click it to open panels for SQL queries, templates, settings, request data and more.
+
+The toolbar doesn't appear on the `/polls/` pages. It inserts itself before a page's `</body>` tag, and the tutorial's polls templates are short snippets without `<html>` or `<body>` tags.
+
+All 12 tests still pass.
 
 ## Changes from the tutorial
 
 - **Secret key in `.env`:** `SECRET_KEY` is loaded from a git-ignored `.env` file with [python-dotenv](https://pypi.org/project/python-dotenv/), so the key isn't published.
+- **Results page filter:** `ResultsView` hides unpublished questions, with two tests. This was an optional suggestion in part 5.
+- **Debug toolbar off during tests:** the toolbar's `TESTING` option keeps it out of the test run.
 - **Not committed:** `.venv/`, `db.sqlite3` and `.env` are git-ignored, so each clone creates its own database and key.
