@@ -1,6 +1,6 @@
 # Django Tutorial: Polls App
 
-My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–6 are complete.
+My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–7 are complete.
 
 ## Setup
 
@@ -41,20 +41,7 @@ Open <http://127.0.0.1:8000/polls/> for the app and <http://127.0.0.1:8000/admin
 
 To vote, click a question on `/polls/`, pick a choice and press **Vote**.
 
-A question with no choices shows only the **Vote** button. The admin site can't add choices yet, since only `Question` is registered there; tutorial part 7 adds that. Until then, add choices in the Django shell:
-
-```bash
-python manage.py shell
-```
-
-```python
->>> q = Question.objects.get(pk=2)
->>> q.choice_set.create(choice_text="Not much")
->>> q.choice_set.create(choice_text="Everything")
->>> exit()
-```
-
-Replace `2` with the question's id (the number in its URL) and use any choice text. Refresh the question's page to see the new options.
+A question with no choices shows only the **Vote** button. To add choices, open the admin site at `/admin/`, go to **Questions**, click the question, and fill in the **Choices** rows at the bottom of the page. Three empty rows are shown each time. Press **Save**, then refresh the question's page to see the new options.
 
 ## Progress
 
@@ -148,9 +135,22 @@ All 12 tests pass. The `ResultsView` filter and its two tests follow the tutoria
 
 With the server running, `/static/polls/style.css` and `/static/polls/images/background.png` are both served, and the 12 tests still pass.
 
-### Parts 7–8 ⏳
+### Part 7: Customizing the admin site ✅
 
-Not started: [customizing the admin](https://docs.djangoproject.com/en/6.1/intro/tutorial07/) and [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
+[Tutorial part 7](https://docs.djangoproject.com/en/6.1/intro/tutorial07/)
+
+| File | What was done |
+| --- | --- |
+| `polls/admin.py` | Added `QuestionAdmin`: the question form has a collapsible "Date information" section, and choices are edited inline in a table (`ChoiceInline`, three blank rows). The question list shows the text, publication date and "Published recently?", with a date filter and a search box. |
+| `polls/models.py` | `was_published_recently()` uses `@admin.display`, so the list shows it as a ✔/✘ icon, sortable by date |
+| `mysite/settings.py` | `TEMPLATES` `DIRS` now includes the project-level `templates/` folder |
+| `templates/admin/base_site.html` | Copied from Django's admin templates, with the header changed to "Polls Administration" |
+
+The admin home page, the question list, and the question add and edit pages all load with these changes, and the 12 tests still pass.
+
+### Part 8 ⏳
+
+Not started: [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
 
 ## Changes from the tutorial
 
