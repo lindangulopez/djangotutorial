@@ -2,6 +2,8 @@
 
 My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. All eight parts are complete, along with the advanced tutorial on packaging the polls app as a reusable app.
 
+This is part of my [Djangonaut Space, Session 7](https://lindangulopez.github.io/djangonaut-session7/) learning plan. Progress is tracked on its [Tutorials](https://lindangulopez.github.io/djangonaut-session7/tutorials/) page.
+
 ## Setup
 
 Requires Python 3.12.
