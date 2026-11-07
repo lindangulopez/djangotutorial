@@ -110,6 +110,61 @@ Two other small differences:
 
 The 30 tests in `modelsdemo/tests.py` replay the guide's examples, including every Beatles query, and check the demo page and seed command. The guide's example of adding Ringo a second time (with "You've been gone for a month and we miss you.") is tested the other way round: the `UniqueConstraint` on `Membership`, from the same example, blocks the duplicate.
 
+## Viewing the database
+
+`db.sqlite3` is the project's database. Django's default settings use [SQLite](https://www.sqlite.org/), which keeps the whole database in this one file, with no separate database server. It's git-ignored, so each clone creates its own with `python manage.py migrate`. Deleting it removes all the questions, votes and the superuser.
+
+Each table is named after its app and model:
+
+| Tables | What's in them |
+| --- | --- |
+| `polls_question`, `polls_choice` | Poll questions, choices and votes |
+| `modelsdemo_*`, `student_info` | The models demo data (`Student` sets its own table name) |
+| `auth_user` and other `auth_*` tables | User accounts, groups and permissions |
+| `django_migrations` | Which migrations have been applied |
+| `django_session`, `django_admin_log`, `django_content_type` | Logins, the admin's history of changes, and Django's list of models |
+
+Ways to look inside it:
+
+- **The Django admin:** <http://127.0.0.1:8000/admin/> shows the polls and models demo data, but not Django's internal tables such as `django_migrations`.
+- **The Django shell:** `python manage.py shell`, then queries such as `Question.objects.all()`.
+- **VS Code:** a SQLite viewer extension (search the Extensions panel for "SQLite Viewer") opens `db.sqlite3` from the file explorer.
+- **The command line:** `python manage.py dbshell` opens the database in the `sqlite3` program, which you install with `sudo apt install sqlite3`. Then try `.tables`, `SELECT * FROM polls_question;` and `.quit`.
+- **DB Browser for SQLite:** a desktop app, described below.
+
+### DB Browser for SQLite
+
+1. **Install it.** Run `sudo apt install sqlitebrowser`, enter your password (nothing shows as you type) and press **Enter** to confirm.
+2. **Start it.** Search your applications for "DB Browser for SQLite", or open the database directly from the project folder:
+
+   ```bash
+   sqlitebrowser db.sqlite3
+   ```
+
+3. **Open the database** (skip this if you used the command above). Choose **File → Open Database Read Only**, go to the project folder, select `db.sqlite3` and click **Open**. Read-only is the safest choice, since nothing can change by accident. To edit, use **File → Open Database** instead.
+4. **Look around** using the tabs along the top:
+
+   | Tab | What it's for |
+   | --- | --- |
+   | **Database Structure** | Every table, with its columns and types |
+   | **Browse Data** | A table's rows, like a spreadsheet; pick the table from the **Table** dropdown |
+   | **Edit Pragmas** | Database settings; not needed here |
+   | **Execute SQL** | Run a query with ▶ or `Ctrl+Return` |
+
+   For example, this query in **Execute SQL** lists each choice with its question and vote count:
+
+   ```sql
+   SELECT q.question_text, c.choice_text, c.votes
+   FROM polls_choice c
+   JOIN polls_question q ON q.id = c.question_id;
+   ```
+
+5. **Close it when you're done** (**File → Close Database**) before running `migrate` or `seed_modelsdemo`. While the file is open, Django may report that the database is locked.
+
+If you opened the database for editing, changes aren't saved until you click **Write Changes** (`Ctrl+S`); **Revert Changes** undoes them. For anything beyond small fixes, edit through the admin or the shell instead, so Django's rules apply, such as the `UniqueConstraint` on `Membership` and the custom `Blog.save()`.
+
+On a system in another language, the menus are translated. In French, for example, **File → Open Database Read Only** is **Fichier → Ouvrir une base de données en lecture seule**.
+
 ## Progress
 
 The file paths in parts 1–8 are where each file was at the time. The advanced tutorial then moved the app from `polls/` to `django-polls/django_polls/`, so `polls/views.py`, for example, is now `django-polls/django_polls/views.py`.
