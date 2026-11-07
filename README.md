@@ -100,8 +100,8 @@ Each page and the voting flow return the expected response:
 | File | What was done |
 | --- | --- |
 | `polls/models.py` | Fixed `was_published_recently()`, which returned `True` for questions dated in the future; it now only returns `True` for the past 24 hours |
-| `polls/views.py` | `IndexView` and `DetailView` filter on `pub_date__lte=timezone.now()`, so questions with a future publication date are hidden from the list and return 404 on their detail page |
-| `polls/tests.py` | Added 10 tests across `QuestionModelTests`, `QuestionIndexViewTests` and `QuestionDetailViewTests`, with a `create_question()` helper |
+| `polls/views.py` | `IndexView`, `DetailView` and `ResultsView` filter on `pub_date__lte=timezone.now()`, so questions with a future publication date are hidden from the list and return 404 on their detail and results pages |
+| `polls/tests.py` | Added 12 tests across `QuestionModelTests`, `QuestionIndexViewTests`, `QuestionDetailViewTests` and `QuestionResultsViewTests`, with a `create_question()` helper |
 
 Run the tests with:
 
@@ -109,7 +109,7 @@ Run the tests with:
 python manage.py test polls
 ```
 
-All 10 tests pass. The tutorial's optional suggestion to apply the same filter to `ResultsView` was left out, since the tutorial gives no code for it.
+All 12 tests pass. The `ResultsView` filter and its two tests follow the tutorial's optional suggestion; the tutorial gives no code for them, so they're modeled on the `DetailView` versions.
 
 ### Parts 6–8 ⏳
 
