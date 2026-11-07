@@ -1,6 +1,6 @@
 # Django Tutorial: Polls App
 
-My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. All eight parts are complete.
+My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. All eight parts are complete, along with the advanced tutorial on packaging the polls app as a reusable app.
 
 ## Setup
 
@@ -13,6 +13,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
+
+This also builds and installs the polls app from the `django-polls/` folder.
 
 The secret key isn't stored in the repository. Copy the example file and generate a key of your own:
 
@@ -31,6 +33,26 @@ python manage.py runserver
 
 Open <http://127.0.0.1:8000/polls/> for the app and <http://127.0.0.1:8000/admin/> for the admin site.
 
+Run the tests with:
+
+```bash
+python manage.py test django_polls
+```
+
+### Editing the polls app
+
+The project uses the *installed* copy of the polls app, not the files in `django-polls/django_polls/`. After changing those files, reinstall the package so the project picks up the change:
+
+```bash
+pip install ./django-polls
+```
+
+To skip that step while developing, install it in editable mode once, so the project reads the files in the repo directly:
+
+```bash
+pip install -e ./django-polls
+```
+
 ## Using the app
 
 | Page | What it shows |
@@ -44,6 +66,8 @@ To vote, click a question on `/polls/`, pick a choice and press **Vote**.
 A question with no choices shows only the **Vote** button. To add choices, open the admin site at `/admin/`, go to **Questions**, click the question, and fill in the **Choices** rows at the bottom of the page. Three empty rows are shown each time. Press **Save**, then refresh the question's page to see the new options.
 
 ## Progress
+
+The file paths in parts 1–8 are where each file was at the time. The advanced tutorial then moved the app from `polls/` to `django-polls/django_polls/`, so `polls/views.py`, for example, is now `django-polls/django_polls/views.py`.
 
 ### Part 1: Requests and responses ✅
 
@@ -115,13 +139,7 @@ Each page and the voting flow return the expected response:
 | `polls/views.py` | `IndexView`, `DetailView` and `ResultsView` filter on `pub_date__lte=timezone.now()`, so questions with a future publication date are hidden from the list and return 404 on their detail and results pages |
 | `polls/tests.py` | Added 12 tests across `QuestionModelTests`, `QuestionIndexViewTests`, `QuestionDetailViewTests` and `QuestionResultsViewTests`, with a `create_question()` helper |
 
-Run the tests with:
-
-```bash
-python manage.py test polls
-```
-
-All 12 tests pass. The `ResultsView` filter and its two tests follow the tutorial's optional suggestion; the tutorial gives no code for them, so they're modeled on the `DetailView` versions.
+All 12 tests pass. Since the advanced tutorial, run them with `python manage.py test django_polls`. The `ResultsView` filter and its two tests follow the tutorial's optional suggestion; the tutorial gives no code for them, so they're modeled on the `DetailView` versions.
 
 ### Part 6: Static files ✅
 
@@ -166,9 +184,49 @@ The toolbar doesn't appear on the `/polls/` pages. It inserts itself before a pa
 
 All 12 tests still pass.
 
+### Advanced tutorial: How to write reusable apps ✅
+
+[Advanced tutorial](https://docs.djangoproject.com/en/6.1/intro/reusable-apps/)
+
+The polls app is now a standalone Python package, `django-polls`, that can be installed into any Django project.
+
+| File | What was done |
+| --- | --- |
+| `django-polls/django_polls/` | The `polls/` app, moved here and renamed. Its history is kept in git. |
+| `django-polls/django_polls/apps.py` | `name = "django_polls"`, and `label = "polls"` so the existing database tables, migrations and template paths keep working |
+| `django-polls/pyproject.toml` | Package metadata: name `django-polls`, version 0.1, requires Django 6.1 or later and Python 3.12 or later, MIT license |
+| `django-polls/README.rst` | Quick-start instructions for adding the app to a project |
+| `django-polls/LICENSE` | MIT license, a copy of the one at the repo root |
+| `django-polls/MANIFEST.in` | Includes the templates and static files in the package |
+| `django-polls/docs/index.rst` | Short usage notes: the pages, adding choices, running tests |
+| `mysite/settings.py` | `INSTALLED_APPS` uses `django_polls.apps.PollsConfig` |
+| `mysite/urls.py` | Includes `django_polls.urls` |
+| `requirements.txt` | Installs the package from `./django-polls` |
+
+The package was built with `python -m build`, which creates `django_polls-0.1.tar.gz` and `django_polls-0.1-py3-none-any.whl` in `django-polls/dist/`, and installed into the virtual environment. To rebuild it:
+
+```bash
+pip install build
+cd django-polls
+python -m build
+```
+
+With the installed package, the polls pages, static files and admin all load, the existing questions and votes are unchanged, no new migrations are needed, and the 12 tests pass.
+
+## License
+
+[MIT](LICENSE) © 2026 Linda Angulo Lopez.
+
+## Metadata
+
+[`codemeta.json`](codemeta.json) describes the project in [CodeMeta 4.0](https://github.com/codemeta/codemeta/releases/tag/4.0) format: name, description, license, repository, author, language and requirements.
+
 ## Changes from the tutorial
 
 - **Secret key in `.env`:** `SECRET_KEY` is loaded from a git-ignored `.env` file with [python-dotenv](https://pypi.org/project/python-dotenv/), so the key isn't published.
+- **Package kept in this repo:** the advanced tutorial puts `django-polls/` beside the project folder. Here it's inside the repo, so the app stays under version control with the project.
+- **MIT license:** the advanced tutorial uses the BSD-3-Clause license; this project uses MIT.
+- **Package README fix:** step 1 of the tutorial's `README.rst` says to add `"polls"` to `INSTALLED_APPS`, while its code example says `"django_polls"`. This copy says `"django_polls"` in both places.
 - **Results page filter:** `ResultsView` hides unpublished questions, with two tests. This was an optional suggestion in part 5.
 - **Debug toolbar off during tests:** the toolbar's `TESTING` option keeps it out of the test run.
-- **Not committed:** `.venv/`, `db.sqlite3` and `.env` are git-ignored, so each clone creates its own database and key.
+- **Not committed:** `.venv/`, `db.sqlite3`, `.env` and the package build output (`dist/`, `build/`, `*.egg-info/`) are git-ignored, so each clone creates its own database and key.
