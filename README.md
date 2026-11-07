@@ -1,6 +1,6 @@
 # Django Tutorial: Polls App
 
-My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–5 are complete.
+My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–6 are complete.
 
 ## Setup
 
@@ -111,9 +111,21 @@ python manage.py test polls
 
 All 12 tests pass. The `ResultsView` filter and its two tests follow the tutorial's optional suggestion; the tutorial gives no code for them, so they're modeled on the `DetailView` versions.
 
-### Parts 6–8 ⏳
+### Part 6: Static files ✅
 
-Not started: [static files](https://docs.djangoproject.com/en/6.1/intro/tutorial06/), [customizing the admin](https://docs.djangoproject.com/en/6.1/intro/tutorial07/) and [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
+[Tutorial part 6](https://docs.djangoproject.com/en/6.1/intro/tutorial06/)
+
+| File | What was done |
+| --- | --- |
+| `polls/static/polls/style.css` | New stylesheet: green question links and a background image in the top-left corner |
+| `polls/static/polls/images/background.png` | Background image; this one is a generated placeholder of green diagonal stripes, since the tutorial says any image will do |
+| `polls/templates/polls/index.html` | Loads the stylesheet with `{% load static %}` and `{% static 'polls/style.css' %}` |
+
+With the server running, `/static/polls/style.css` and `/static/polls/images/background.png` are both served, and the 12 tests still pass.
+
+### Parts 7–8 ⏳
+
+Not started: [customizing the admin](https://docs.djangoproject.com/en/6.1/intro/tutorial07/) and [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
 
 ## Changes from the tutorial
 
