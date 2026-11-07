@@ -1,6 +1,6 @@
 # Django Tutorial: Polls App
 
-My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–4 are complete.
+My work through the official [Django 6.1 tutorial](https://docs.djangoproject.com/en/6.1/intro/), which builds a small polls application. Parts 1–5 are complete.
 
 ## Setup
 
@@ -93,9 +93,27 @@ Each page and the voting flow return the expected response:
 | `POST /polls/1/vote/` with a choice | 302: vote counted, redirect to `/polls/1/results/` |
 | `POST /polls/1/vote/` without a choice | 200: form shown again with "You didn't select a choice." |
 
-### Parts 5–8 ⏳
+### Part 5: Automated tests ✅
 
-Not started: [testing](https://docs.djangoproject.com/en/6.1/intro/tutorial05/), [static files](https://docs.djangoproject.com/en/6.1/intro/tutorial06/), [customizing the admin](https://docs.djangoproject.com/en/6.1/intro/tutorial07/) and [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
+[Tutorial part 5](https://docs.djangoproject.com/en/6.1/intro/tutorial05/)
+
+| File | What was done |
+| --- | --- |
+| `polls/models.py` | Fixed `was_published_recently()`, which returned `True` for questions dated in the future; it now only returns `True` for the past 24 hours |
+| `polls/views.py` | `IndexView` and `DetailView` filter on `pub_date__lte=timezone.now()`, so questions with a future publication date are hidden from the list and return 404 on their detail page |
+| `polls/tests.py` | Added 10 tests across `QuestionModelTests`, `QuestionIndexViewTests` and `QuestionDetailViewTests`, with a `create_question()` helper |
+
+Run the tests with:
+
+```bash
+python manage.py test polls
+```
+
+All 10 tests pass. The tutorial's optional suggestion to apply the same filter to `ResultsView` was left out, since the tutorial gives no code for it.
+
+### Parts 6–8 ⏳
+
+Not started: [static files](https://docs.djangoproject.com/en/6.1/intro/tutorial06/), [customizing the admin](https://docs.djangoproject.com/en/6.1/intro/tutorial07/) and [third-party packages](https://docs.djangoproject.com/en/6.1/intro/tutorial08/).
 
 ## Changes from the tutorial
 
