@@ -31,6 +31,31 @@ python manage.py runserver
 
 Open <http://127.0.0.1:8000/polls/> for the app and <http://127.0.0.1:8000/admin/> for the admin site.
 
+## Using the app
+
+| Page | What it shows |
+| --- | --- |
+| `/polls/` | The five latest questions, as links. There are no vote options on this page. |
+| `/polls/<id>/` | One question's voting form, with a radio button for each choice |
+| `/polls/<id>/results/` | Vote counts for each choice, shown after you vote |
+
+To vote, click a question on `/polls/`, pick a choice and press **Vote**.
+
+A question with no choices shows only the **Vote** button. The admin site can't add choices yet, since only `Question` is registered there; tutorial part 7 adds that. Until then, add choices in the Django shell:
+
+```bash
+python manage.py shell
+```
+
+```python
+>>> q = Question.objects.get(pk=2)
+>>> q.choice_set.create(choice_text="Not much")
+>>> q.choice_set.create(choice_text="Everything")
+>>> exit()
+```
+
+Replace `2` with the question's id (the number in its URL) and use any choice text. Refresh the question's page to see the new options.
+
 ## Progress
 
 ### Part 1: Requests and responses ✅
