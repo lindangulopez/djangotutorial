@@ -329,4 +329,5 @@ With the installed package, the polls pages, static files and admin all load, th
 - **Package README fix:** step 1 of the tutorial's `README.rst` says to add `"polls"` to `INSTALLED_APPS`, while its code example says `"django_polls"`. This copy says `"django_polls"` in both places.
 - **Results page filter:** `ResultsView` hides unpublished questions, with two tests. This was an optional suggestion in part 5.
 - **Debug toolbar off during tests:** the toolbar's `TESTING` option keeps it out of the test run.
+- **Database viewed in DB Browser for SQLite:** part 2 of the tutorial suggests checking the tables Django created with the database's command-line client (`.tables` for SQLite). Here `db.sqlite3` was opened in [DB Browser for SQLite](https://sqlitebrowser.org/) instead, a desktop app that shows the tables, columns and rows like a spreadsheet and can run SQL queries. See [Viewing the database](#viewing-the-database).
 - **Not committed:** `.venv/`, `db.sqlite3`, `.env` and the package build output (`dist/`, `build/`, `*.egg-info/`) are git-ignored, so each clone creates its own database and key.
