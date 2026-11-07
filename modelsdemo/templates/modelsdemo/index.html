@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Models demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 52rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1f2328; }
+    h1 { margin-bottom: .25rem; }
+    h2 { margin-top: 2.5rem; border-bottom: 1px solid #d0d7de; padding-bottom: .25rem; }
+    section p.concept { color: #59636e; margin-top: 0; }
+    table { border-collapse: collapse; width: 100%; margin: .5rem 0 1rem; }
+    th, td { border: 1px solid #d0d7de; padding: .35rem .6rem; text-align: left; vertical-align: top; }
+    th { background: #f6f8fa; }
+    code { background: #f6f8fa; padding: .1rem .3rem; border-radius: 4px; }
+    .empty { color: #9a6700; }
+    nav ol { columns: 2; }
+  </style>
+</head>
+<body>
+<h1>Models demo</h1>
+<p>Examples from the Django <a href="https://docs.djangoproject.com/en/6.1/topics/db/models/">Models topic guide</a>, with live data from the database.
+{% if not groups %}<br><strong class="empty">No data yet: run <code>python manage.py seed_modelsdemo</code>, then refresh.</strong>{% endif %}</p>
+
+<nav>
+  <ol>
+    <li><a href="#fields">Fields</a></li>
+    <li><a href="#choices">Field options: choices</a></li>
+    <li><a href="#primary-key">Field options: primary_key</a></li>
+    <li><a href="#verbose">Verbose field names</a></li>
+    <li><a href="#many-to-one">Many-to-one</a></li>
+    <li><a href="#many-to-many">Many-to-many</a></li>
+    <li><a href="#through">Many-to-many with a through model</a></li>
+    <li><a href="#meta">Meta options</a></li>
+    <li><a href="#methods">Model methods</a></li>
+    <li><a href="#save">Overriding save()</a></li>
+    <li><a href="#abstract">Abstract base classes</a></li>
+    <li><a href="#multi-table">Multi-table inheritance</a></li>
+    <li><a href="#proxy">Proxy models</a></li>
+    <li><a href="#multiple">Multiple inheritance</a></li>
+  </ol>
+</nav>
+
+<section id="fields">
+  <h2>Fields</h2>
+  <p class="concept"><code>Album.artist</code> is a <code>ForeignKey</code> to <code>Musician</code>; each field type maps to a database column type.</p>
+  <table>
+    <tr><th>Album</th><th>Artist</th><th>Instrument</th><th>Released</th><th>Stars</th></tr>
+    {% for album in albums %}
+    <tr><td>{{ album.name }}</td><td>{{ album.artist }}</td><td>{{ album.artist.instrument }}</td><td>{{ album.release_date }}</td><td>{{ album.num_stars }}</td></tr>
+    {% empty %}<tr><td colspan="5" class="empty">No albums.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="choices">
+  <h2>Field options: choices</h2>
+  <p class="concept">The database stores the short value; <code>get_FOO_display()</code> returns the label. <code>ShirtOwner</code> uses a dictionary, <code>Runner</code> uses <code>TextChoices</code>.</p>
+  <table>
+    <tr><th>Name</th><th>Stored value</th><th>Label</th></tr>
+    {% for owner in shirt_owners %}<tr><td>{{ owner.name }}</td><td><code>{{ owner.shirt_size }}</code></td><td>{{ owner.get_shirt_size_display }}</td></tr>{% endfor %}
+    {% for runner in runners %}<tr><td>{{ runner.name }}</td><td><code>{{ runner.medal }}</code></td><td>{{ runner.get_medal_display }}</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="primary-key">
+  <h2>Field options: primary_key</h2>
+  <p class="concept"><code>Fruit.name</code> is the primary key. Changing it and saving creates a new row instead of renaming the old one.</p>
+  <table>
+    <tr><th>name (primary key)</th><th>color</th></tr>
+    {% for fruit in fruits %}<tr><td>{{ fruit.name }}</td><td>{{ fruit.color }}</td></tr>
+    {% empty %}<tr><td colspan="2" class="empty">No fruit.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="verbose">
+  <h2>Verbose field names</h2>
+  <p class="concept">A label can be passed as the first argument, or as <code>verbose_name</code> for relations. Without one, Django turns underscores into spaces.</p>
+  <table>
+    <tr><th>Field</th><th>verbose_name</th></tr>
+    {% for field in verbose_fields %}<tr><td><code>{{ field.name }}</code></td><td>{{ field.verbose_name }}</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="many-to-one">
+  <h2>Many-to-one</h2>
+  <p class="concept">Many <code>Car</code>s point to one <code>Manufacturer</code>. The reverse side is <code>manufacturer.car_set</code>.</p>
+  <ul>
+    {% for maker in manufacturers %}<li>{{ maker }}: {% for car in maker.car_set.all %}{{ car }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+    {% empty %}<li class="empty">No manufacturers.</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="many-to-many">
+  <h2>Many-to-many</h2>
+  <p class="concept"><code>Pizza.toppings</code> is a <code>ManyToManyField</code>; Django creates the join table.</p>
+  <ul>
+    {% for pizza in pizzas %}<li>{{ pizza }}: {% for topping in pizza.toppings.all %}{{ topping }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>
+    {% empty %}<li class="empty">No pizzas.</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="through">
+  <h2>Many-to-many with a through model</h2>
+  <p class="concept"><code>Group.members</code> goes through <code>Membership</code>, which stores extra data about each link. A <code>UniqueConstraint</code> allows one membership per person and group.</p>
+  {% for group in groups %}<p><strong>{{ group }}</strong>: {% for person in group.members.all %}{{ person }}{% if not forloop.last %}, {% endif %}{% endfor %}</p>{% endfor %}
+  <table>
+    <tr><th>Person</th><th>Group</th><th>Date joined</th><th>Invite reason</th></tr>
+    {% for m in memberships %}<tr><td>{{ m.person }}</td><td>{{ m.group }}</td><td>{{ m.date_joined }}</td><td>{{ m.invite_reason }}</td></tr>
+    {% empty %}<tr><td colspan="4" class="empty">No memberships.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="meta">
+  <h2>Meta options</h2>
+  <p class="concept"><code>Ox.Meta</code> sets <code>ordering = {{ ox_meta.ordering }}</code> and <code>verbose_name_plural = "{{ ox_meta.verbose_name_plural }}"</code>, so the oxen come back sorted by horn length without an <code>order_by()</code>.</p>
+  <ul>
+    {% for ox in oxen %}<li>{{ ox }}</li>{% empty %}<li class="empty">No oxen.</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="methods">
+  <h2>Model methods</h2>
+  <p class="concept"><code>baby_boomer_status()</code> is a method and <code>full_name</code> is a property, both on <code>Citizen</code>.</p>
+  <table>
+    <tr><th>full_name</th><th>birth_date</th><th>baby_boomer_status()</th></tr>
+    {% for c in citizens %}<tr><td>{{ c.full_name }}</td><td>{{ c.birth_date|default:"—" }}</td><td>{{ c.baby_boomer_status }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="empty">No citizens.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="save">
+  <h2>Overriding save()</h2>
+  <p class="concept"><code>Blog.save()</code> fills in <code>slug</code> from the name, and refuses to save "Yoko Ono's blog", which is why it isn't listed.</p>
+  <table>
+    <tr><th>Name</th><th>Slug</th><th>Tagline</th></tr>
+    {% for blog in blogs %}<tr><td>{{ blog.name }}</td><td><code>{{ blog.slug }}</code></td><td>{{ blog.tagline }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="empty">No blogs.</td></tr>{% endfor %}
+  </table>
+</section>
+
+<section id="abstract">
+  <h2>Abstract base classes</h2>
+  <p class="concept"><code>Student</code> inherits <code>name</code> and <code>age</code> from the abstract <code>CommonInfo</code>, which has no table of its own. It also inherits <code>ordering = ["name"]</code>, and stores its rows in <code>{{ student_table }}</code>.</p>
+  <table>
+    <tr><th>Name</th><th>Age</th><th>Home group</th></tr>
+    {% for s in students %}<tr><td>{{ s.name }}</td><td>{{ s.age }}</td><td>{{ s.home_group }}</td></tr>
+    {% empty %}<tr><td colspan="3" class="empty">No students.</td></tr>{% endfor %}
+  </table>
+  <p class="concept"><code>ChildA</code> and <code>ChildB</code> share an abstract base whose <code>related_name</code> uses <code>%(app_label)s_%(class)s</code>, so each gets its own reverse name: <code>topping.modelsdemo_childa_related</code> and <code>topping.modelsdemo_childb_related</code>.</p>
+  <ul>
+    {% for child in child_as %}<li>ChildA #{{ child.pk }}: {% for t in child.toppings.all %}{{ t }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endfor %}
+    {% for child in child_bs %}<li>ChildB #{{ child.pk }}: {% for t in child.toppings.all %}{{ t }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="multi-table">
+  <h2>Multi-table inheritance</h2>
+  <p class="concept"><code>Restaurant</code> and <code>Supplier</code> inherit from <code>Place</code>. Each has its own table, linked to <code>Place</code> by an automatic <code>place_ptr</code> one-to-one field, so every restaurant is also a place.</p>
+  <table>
+    <tr><th>Place</th><th>Address</th><th>Is a Restaurant?</th><th>Is a Supplier?</th></tr>
+    {% for place in places %}<tr><td>{{ place }}</td><td>{{ place.address }}</td>
+      <td>{% if place.restaurant %}Yes{% if place.restaurant.serves_hot_dogs %} (serves hot dogs){% endif %}{% else %}No{% endif %}</td>
+      <td>{% if place.supplier %}Yes{% else %}No{% endif %}</td></tr>
+    {% empty %}<tr><td colspan="4" class="empty">No places.</td></tr>{% endfor %}
+  </table>
+  <p class="concept"><code>Supplier.customers</code> is a many-to-many to <code>Place</code> with <code>related_name="provider"</code>, which avoids a clash with the inherited link.</p>
+  <ul>
+    {% for s in suppliers %}<li>{{ s }} supplies: {% for c in s.customers.all %}{{ c }}{% if not forloop.last %}, {% endif %}{% endfor %}</li>{% endfor %}
+  </ul>
+</section>
+
+<section id="proxy">
+  <h2>Proxy models</h2>
+  <p class="concept"><code>MyCitizen</code> and <code>OrderedCitizen</code> are proxies for <code>Citizen</code>: same table, different Python behaviour. <code>MyCitizen</code> adds <code>greeting()</code>; <code>OrderedCitizen</code> orders by last name.</p>
+  <p><strong>MyCitizen.greeting()</strong></p>
+  <ul>
+    {% for c in my_citizens %}<li>{{ c.greeting }}</li>{% empty %}<li class="empty">No citizens.</li>{% endfor %}
+  </ul>
+  <p><strong>OrderedCitizen.objects.all()</strong>, with no <code>order_by()</code></p>
+  <ol>
+    {% for c in ordered_citizens %}<li>{{ c.last_name }}, {{ c.first_name }}</li>{% empty %}<li class="empty">No citizens.</li>{% endfor %}
+  </ol>
+</section>
+
+<section id="multiple">
+  <h2>Multiple inheritance</h2>
+  <p class="concept"><code>BookReview</code> inherits from both <code>Book</code> and <code>Article</code>. Both share the <code>Piece</code> base, so each declares an explicit <code>parent_link</code> to avoid a field clash.</p>
+  <ul>
+    {% for review in reviews %}<li>{{ review.title }}: "{{ review.headline }}"</li>{% empty %}<li class="empty">No reviews.</li>{% endfor %}
+  </ul>
+</section>
+</body>
+</html>

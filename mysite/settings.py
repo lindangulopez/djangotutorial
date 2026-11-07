@@ -38,6 +38,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "django_polls.apps.PollsConfig",
+    "modelsdemo",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
